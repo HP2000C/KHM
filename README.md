@@ -1,2 +1,2 @@
-# KHM
-🇮🇷 Khatte Moghaddam 🚀 🪖
+# 🇮🇷 KHM 🚀
+🪖 Khatte Moghaddam
