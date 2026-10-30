@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>خط مقدم</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  background:radial-gradient(circle at 50% -10%,#1c4a38,#07120d 75%);
+  font-family:'Vazirmatn','Vazir',Tahoma,sans-serif;
+  color:#e9f7ee;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  user-select:none;
+}
+#app{
+  width:min(100vw,1020px);height:100dvh;
+  display:flex;flex-direction:column;gap:6px;padding:6px;
+}
+/* ===== HUD ===== */
+#hud{
+  display:flex;gap:6px;align-items:center;
+  background:linear-gradient(180deg,#123c2c,#0b2419);
+  border:1px solid #2f6b4e;border-radius:12px;
+  padding:6px 10px;flex:0 0 auto;
+  box-shadow:0 4px 18px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.06);
+}
+.hud-item{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(0,0,0,.28);border-radius:9px;
+  padding:4px 10px;font-size:14px;font-weight:700;
+  border:1px solid rgba(255,255,255,.07);white-space:nowrap;
+}
+.hud-item b{color:#ffd964;font-weight:800;font-size:15px;}
+#levelName{
+  flex:1 1 auto;justify-content:center;
+  color:#9ff0c0;font-size:13px;letter-spacing:.3px;
+  background:linear-gradient(90deg,rgba(35,159,64,.18),rgba(218,0,0,.14));
+}
+#levelName::before{content:"⚑ ";color:#ffd964}
+.hud-btn{
+  background:#164e35;border:1px solid #2f6b4e;color:#d6ffe8;
+  border-radius:9px;padding:5px 9px;font-size:15px;cursor:pointer;
+  font-family:inherit;transition:.15s;line-height:1;
+}
+.hud-btn:hover{background:#1f6b48;transform:translateY(-1px);}
+.hud-btn:active{transform:scale(.94);}
+/* ===== STAGE ===== */
+#stage{
+  position:relative;flex:1 1 auto;min-height:0;
+  display:flex;align-items:center;justify-content:center;
+}
+#cv{
+  max-width:100%;max-height:100%;width:auto;height:auto;
+  border-radius:14px;display:block;
+  box-shadow:0 0 0 2px #2f6b4e,0 10px 40px rgba(0,0,0,.6);
+  cursor:crosshair;touch-action:none;
+}
+/* ===== SHOP ===== */
+#shop,#towerPanel{
+  flex:0 0 auto;
+  background:linear-gradient(180deg,#103526,#0a1f16);
+  border:1px solid #2f6b4e;border-radius:12px;
+  padding:6px;display:flex;gap:6px;overflow-x:auto;
+  scrollbar-width:thin;scrollbar-color:#2f6b4e transparent;
+  box-shadow:0 -3px 16px rgba(0,0,0,.4);
+}
+#shop::-webkit-scrollbar,#towerPanel::-webkit-scrollbar{height:5px}
+#shop::-webkit-scrollbar-thumb,#towerPanel::-webkit-scrollbar-thumb{background:#2f6b4e;border-radius:9px}
+#towerPanel{display:none;}
+.card{
+  flex:0 0 auto;width:74px;
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  background:linear-gradient(180deg,#1a4a35,#123526);
+  border:1.5px solid #2f6b4e;border-radius:11px;
+  padding:5px 3px;cursor:pointer;transition:.15s;position:relative;
+}
+.card:hover{transform:translateY(-2px);border-color:#4fbf82;box-shadow:0 4px 12px rgba(0,0,0,.4);}
+.card.sel{border-color:#ffd964;box-shadow:0 0 0 2px #ffd964,0 0 16px rgba(255,217,100,.4);background:linear-gradient(180deg,#2a5c40,#1a4430);}
+.card.poor{opacity:.42;filter:grayscale(.6);}
+.card .ic{font-size:20px;line-height:1.1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));}
+.card .nm{font-size:10.5px;font-weight:700;color:#d6ffe8;}
+.card .cost{font-size:10.5px;font-weight:800;color:#ffd964;}
+.card .cost::before{content:"💰";font-size:9px;margin-inline-end:2px;filter:none}
+/* tower panel */
+#towerPanel{align-items:center;}
+.tp-ic{font-size:26px;padding:0 4px}
+.tp-info{display:flex;flex-direction:column;gap:1px;font-size:12px;min-width:88px}
+.tp-info b{color:#ffd964;font-size:13px}
+.tp-info span{color:#9ff0c0;font-size:11px}
+.tp-btn{
+  flex:0 0 auto;font-family:inherit;font-weight:800;font-size:12px;
+  border:none;border-radius:9px;padding:9px 13px;cursor:pointer;
+  transition:.15s;color:#06210f;
+}
+.tp-btn:hover{transform:translateY(-1px);filter:brightness(1.1)}
+.tp-btn:active{transform:scale(.95)}
+.tp-up{background:linear-gradient(180deg,#7dffb0,#28c46a);}
+.tp-up.dis{background:#3a4a42;color:#7b8d84;cursor:not-allowed;transform:none}
+.tp-sell{background:linear-gradient(180deg,#ffb36b,#e0721f);}
+/* ===== OVERLAY ===== */
+#overlay{
+  position:absolute;inset:0;display:none;
+  align-items:center;justify-content:center;
+  background:rgba(4,14,10,.82);backdrop-filter:blur(5px);
+  border-radius:14px;z-index:20;padding:14px;
+}
+#overlay.show{display:flex;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.panel{
+  background:linear-gradient(180deg,#14402e,#0b2419);
+  border:2px solid #3a8a63;border-radius:18px;
+  padding:22px 26px;text-align:center;max-width:400px;
+  box-shadow:0 20px 60px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.08);
+  animation:pop .35s cubic-bezier(.2,1.4,.5,1);
+}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.panel h1{
+  margin:0 0 6px;font-size:30px;font-weight:900;letter-spacing:1px;
+  background:linear-gradient(180deg,#fff,#7dffb0 60%,#28c46a);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 30px rgba(125,255,176,.3);
+}
+.panel h2{margin:0 0 8px;font-size:21px;color:#ffd964;font-weight:800}
+.panel p{margin:0 0 16px;font-size:13.5px;line-height:2;color:#b6e3c9}
+.panel .flag{margin:0 auto 12px;width:76px;height:52px;border-radius:6px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15)}
+.panel .flag i{display:block;height:33.33%}
+.panel button{
+  font-family:inherit;font-weight:900;font-size:15px;
+  background:linear-gradient(180deg,#7dffb0,#22b360);
+  color:#06210f;border:none;border-radius:12px;
+  padding:11px 30px;cursor:pointer;transition:.15s;
+  box-shadow:0 6px 0 #146b3a,0 10px 24px rgba(0,0,0,.4);
+}
+.panel button:hover{transform:translateY(-2px);box-shadow:0 8px 0 #146b3a,0 14px 28px rgba(0,0,0,.45)}
+.panel button:active{transform:translateY(4px);box-shadow:0 2px 0 #146b3a}
+@media(max-width:560px){
+  .panel h1{font-size:24px}.panel p{font-size:12px}
+  .card{width:64px}.card .nm,.card .cost{font-size:9.5px}
+  .hud-item{font-size:12px;padding:3px 7px}.hud-item b{font-size:13px}
+  #levelName{font-size:11px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hud">
+    <div class="hud-item"><span>❤️</span><b id="uiLives">۲۰</b></div>
+    <div class="hud-item"><span>💰</span><b id="uiMoney">۲۵۰</b></div>
+    <div class="hud-item"><span>🌊</span><b id="uiWave">۰/۰</b></div>
+    <div class="hud-item" id="levelName">خط مقدم</div>
+    <button class="hud-btn" id="speedBtn" title="سرعت">⏩</button>
+    <button class="hud-btn" id="muteBtn" title="صدا">🔊</button>
+  </div>
+
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="overlay"></div>
+  </div>
+
+  <div id="shop"></div>
+  <div id="towerPanel"></div>
+</div>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════
+   خط مقدم — Frontline Tower Defense
+   ═══════════════════════════════════════════ */
+
+/* ---------- ابزار ---------- */
+const FAD = "۰۱۲۳۴۵۶۷۸۹";
+const fa = n => String(n).replace(/\d/g, d => FAD[+d]);
+const clamp = (v,a,b)=> v<a?a:v>b?b:v;
+const dist2 = (a,b,c,d)=>{const x=a-c,y=b-d;return x*x+y*y;};
+
+/* ---------- صدا ---------- */
+let actx = null, muted = false;
+function audioInit(){
+  if(!actx){
+    try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ actx=null; }
+  }
+  if(actx && actx.state === 'suspended') actx.resume();
+}
+function tone(freq,dur,type,vol,slideTo){
+  if(!actx||muted) return;
+  const t=actx.currentTime;
+  const o=actx.createOscillator(), g=actx.createGain();
+  o.type=type||'square';
+  o.frequency.setValueAtTime(freq,t);
+  if(slideTo) o.frequency.exponentialRampToValueAtTime(Math.max(20,slideTo),t+dur);
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(vol||0.05,t+0.008);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g);g.connect(actx.destination);
+  o.start(t);o.stop(t+dur+0.03);
+}
+let noiseBuf=null;
+function noise(dur,vol,cut){
+  if(!actx||muted) return;
+  const t=actx.currentTime;
+  if(!noiseBuf){
+    noiseBuf=actx.createBuffer(1,actx.sampleRate*0.5,actx.sampleRate);
+    const d=noiseBuf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+  }
+  const s=actx.createBufferSource(); s.buffer=noiseBuf;
+  const f=actx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=cut||1200;
+  const g=actx.createGain();
+  g.gain.setValueAtTime(vol||0.06,t);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  s.connect(f);f.connect(g);g.connect(actx.destination);
+  s.start(t);s.stop(t+dur+0.02);
+}
+const SND = {
+  shoot(){ tone(920,0.05,'square',0.022,600); },
+  cannon(){ noise(0.18,0.09,420); tone(110,0.2,'sine',0.06,45); },
+  ice(){ tone(1500,0.09,'sine',0.03,900); },
+  rocket(){ noise(0.22,0.07,900); tone(320,0.18,'sawtooth',0.03,140); },
+  zap(){ tone(1800,0.07,'sawtooth',0.035,400); tone(900,0.1,'square',0.02,1800); },
+  hit(){ noise(0.05,0.028,2600); },
+  die(){ tone(320,0.13,'sawtooth',0.045,90); noise(0.1,0.03,700); },
+  place(){ tone(523,0.09,'sine',0.06); setTimeout(()=>tone(784,0.13,'sine',0.055),75); },
+  upgrade(){ tone(660,0.08,'triangle',0.06); setTimeout(()=>tone(880,0.09,'triangle',0.06),70); setTimeout(()=>tone(1174,0.15,'triangle',0.05),140); },
+  sell(){ tone(700,0.08,'triangle',0.05,350); },
+  life(){ tone(220,0.28,'sawtooth',0.075,70); noise(0.2,0.05,300); },
+  wave(){ noise(0.26,0.1,260); tone(75,0.32,'sine',0.09,48); },
+  clear(){ [523,659,784].forEach((f,i)=>setTimeout(()=>tone(f,0.13,'sine',0.05),i*85)); },
+  win(){ [523,659,784,1047,1319].forEach((f,i)=>setTimeout(()=>tone(f,0.28,'triangle',0.06),i*130)); },
+  lose(){ [440,392,330,262].forEach((f,i)=>setTimeout(()=>tone(f,0.34,'sawtooth',0.06),i*180)); },
+  nope(){ tone(160,0.12,'square',0.05,110); }
+};
+
+/* ---------- ابعاد ---------- */
+const COLS=20, ROWS=12, TILE=50, W=COLS*TILE, H=ROWS*TILE;
+const DPR = Math.min(2, window.devicePixelRatio||1);
+
+const canvas = document.getElementById('cv');
+const ctx = canvas.getContext('2d', {alpha:false});
+canvas.width = W*DPR; canvas.height = H*DPR;
+ctx.scale(DPR,DPR);
+
+/* ---------- مسیر ---------- */
+const PATH_CELLS = [[-1,2],[5,2],[5,9],[10,9],[10,4],[15,4],[15,10],[19,10]];
+const WAYPOINTS = PATH_CELLS.map(([c,r])=>({x:c*TILE+TILE/2, y:r*TILE+TILE/2}));
+const pathSet = new Set();
+(function buildPathSet(){
+  for(let i=0;i<PATH_CELLS.length-1;i++){
+    let [c1,r1]=PATH_CELLS[i], [c2,r2]=PATH_CELLS[i+1];
+    const dc=Math.sign(c2-c1), dr=Math.sign(r2-r1);
+    let c=c1,r=r1; pathSet.add(c+','+r);
+    let guard=0;
+    while((c!==c2||r!==r2) && guard++<200){ c+=dc; r+=dr; pathSet.add(c+','+r); }
+  }
+})();
+
+/* ---------- انواع برج ---------- */
+const TOWERS = {
+  archer : {name:'کماندار',  cost:60,  range:115, dmg:9,  rate:0.52, air:true,  color:'#2e9e57', icon:'🏹', desc:'سریع و ارزان'},
+  cannon : {name:'توپخانه',  cost:110, range:130, dmg:28, rate:1.35, splash:46, air:false, color:'#a1663a', icon:'💣', desc:'آسیب انفجاری'},
+  frost  : {name:'سرمازا',   cost:90,  range:105, dmg:5,  rate:0.95, slow:0.52, slowTime:1.7, air:true, color:'#2e9bd6', icon:'❄️', desc:'کندکننده'},
+  missile: {name:'موشک‌انداز',cost:175, range:195, dmg:48, rate:1.85, splash:34, air:true, color:'#d13b3b', icon:'🚀', desc:'برد بالا'},
+  tesla  : {name:'برق‌زن',   cost:205, range:122, dmg:15, rate:0.88, chain:3, air:true, color:'#e8b52e', icon:'⚡', desc:'زنجیره‌ای'}
+};
+const TOWER_KEYS = Object.keys(TOWERS);
+
+/* ---------- انواع دشمن ---------- */
+const ENEMIES = {
+  soldier:{hp:62,  speed:52, reward:9,  r:11, color:'#9c7b57', armor:0},
+  runner :{hp:42,  speed:98, reward:9,  r:9,  color:'#e07a1f', armor:0},
+  tank   :{hp:250, speed:34, reward:24, r:16, color:'#5b7a86', armor:4},
+  jet    :{hp:88,  speed:124,reward:17, r:11, color:'#8b6dd6', armor:0, air:true},
+  boss   :{hp:1250,speed:27, reward:210,r:24, color:'#c22a2a', armor:6}
+};
+
+/* ---------- مراحل ---------- */
+const LEVELS = [
+  { name:'مرزهای غربی', waves:[
+    [{t:'soldier',n:6,g:0.95}],
+    [{t:'soldier',n:8,g:0.8}],
+    [{t:'runner',n:7,g:0.55},{t:'soldier',n:6,g:0.8}],
+    [{t:'soldier',n:10,g:0.6},{t:'tank',n:1,g:1.2}],
+    [{t:'soldier',n:12,g:0.5},{t:'tank',n:2,g:1.1},{t:'runner',n:10,g:0.4}]
+  ]},
+  { name:'کوهستان زاگرس', waves:[
+    [{t:'soldier',n:10,g:0.7},{t:'runner',n:8,g:0.5}],
+    [{t:'jet',n:4,g:1.0},{t:'soldier',n:8,g:0.6}],
+    [{t:'tank',n:3,g:1.0},{t:'runner',n:12,g:0.35}],
+    [{t:'jet',n:6,g:0.8},{t:'tank',n:3,g:0.9},{t:'soldier',n:10,g:0.5}],
+    [{t:'soldier',n:14,g:0.4},{t:'tank',n:4,g:0.8},{t:'jet',n:6,g:0.7}],
+    [{t:'boss',n:1,g:1},{t:'runner',n:14,g:0.3},{t:'tank',n:3,g:0.9}]
+  ]},
+  { name:'سواحل خلیج فارس', waves:[
+    [{t:'runner',n:14,g:0.35},{t:'soldier',n:10,g:0.5}],
+    [{t:'jet',n:8,g:0.7},{t:'tank',n:3,g:0.9}],
+    [{t:'tank',n:5,g:0.8},{t:'runner',n:16,g:0.3}],
+    [{t:'jet',n:10,g:0.6},{t:'soldier',n:16,g:0.4}],
+    [{t:'boss',n:1,g:1},{t:'tank',n:4,g:0.8},{t:'jet',n:8,g:0.6}],
+    [{t:'soldier',n:20,g:0.35},{t:'tank',n:6,g:0.7},{t:'jet',n:10,g:0.5}]
+  ]},
+  { name:'دشت کویر', waves:[
+    [{t:'tank',n:4,g:0.9},{t:'runner',n:12,g:0.3}],
+    [{t:'jet',n:10,g:0.55},{t:'soldier',n:14,g:0.4}],
+    [{t:'tank',n:6,g:0.7},{t:'jet',n:8,g:0.6},{t:'runner',n:14,g:0.3}],
+    [{t:'boss',n:2,g:1.2},{t:'soldier',n:16,g:0.4}],
+    [{t:'tank',n:8,g:0.6},{t:'jet',n:12,g:0.5}],
+    [{t:'boss',n:1,g:1},{t:'tank',n:8,g:0.6},{t:'runner',n:20,g:0.25}]
+  ]},
+  { name:'آخرین سنگر', waves:[
+    [{t:'soldier',n:20,g:0.3},{t:'jet',n:10,g:0.5}],
+    [{t:'tank',n:8,g:0.6},{t:'runner',n:20,g:0.25}],
+    [{t:'boss',n:2,g:1},{t:'jet',n:14,g:0.45}],
+    [{t:'tank',n:10,g:0.5},{t:'soldier',n:24,g:0.3}],
+    [{t:'boss',n:2,g:1},{t:'tank',n:10,g:0.5},{t:'jet',n:16,g:0.4}],
+    [{t:'boss',n:3,g:1.2},{t:'runner',n:30,g:0.2},{t:'tank',n:8,g:0.6}]
+  ]}
+];
+
+/* ---------- وضعیت ---------- */
+const S = {
+  level:0, waves:[], wave:0, waveActive:false, waveDelay:4,
+  money:250, lives:20, maxLives:20,
+  enemies:[], towers:[], projs:[], effects:[], spawnQueue:[], spawnTimer:0,
+  selectedType:null, selectedTower:null, hover:null,
+  started:false, gameOver:false, paused:false,
+  time:0, kills:0, speed:1, uiTick:0
+};
+
+/* ═══════ پس‌زمینه (یک‌بار رندر) ═══════ */
+const bgCanvas = document.createElement('canvas');
+bgCanvas.width = W*DPR; bgCanvas.height = H*DPR;
+const bctx = bgCanvas.getContext('2d');
+bctx.scale(DPR,DPR);
+
+function star8(c,x,y,r){
+  c.beginPath();
+  for(let i=0;i<16;i++){
+    const a = (Math.PI*2/16)*i - Math.PI/2;
+    const rad = i%2===0 ? r : r*0.42;
+    const px = x + Math.cos(a)*rad, py = y + Math.sin(a)*rad;
+    i===0 ? c.moveTo(px,py) : c.lineTo(px,py);
+  }
+  c.closePath(); c.stroke();
+}
+function pathStroke(c){
+  c.beginPath();
+  c.moveTo(WAYPOINTS[0].x, WAYPOINTS[0].y);
+  for(let i=1;i<WAYPOINTS.length;i++) c.lineTo(WAYPOINTS[i].x, WAYPOINTS[i].y);
+  c.stroke();
+}
+function drawBackground(c){
+  const g = c.createLinearGradient(0,0,W*0.4,H);
+  g.addColorStop(0,'#173d2d'); g.addColorStop(0.5,'#102b20'); g.addColorStop(1,'#0a1c14');
+  c.fillStyle=g; c.fillRect(0,0,W,H);
+
+  // نقش ایرانی
+  c.save(); c.globalAlpha=0.055; c.strokeStyle='#8effc0'; c.lineWidth=1.4;
+  for(let y=0;y<=H;y+=TILE){
+    for(let x=0;x<=W;x+=TILE){
+      star8(c, x, y, TILE*0.30);
+      c.beginPath(); c.arc(x,y,TILE*0.09,0,7); c.stroke();
+    }
+  }
+  c.restore();
+
+  // خطوط شبکه ظریف
+  c.save(); c.globalAlpha=0.05; c.strokeStyle='#ffffff'; c.lineWidth=1;
+  for(let x=0;x<=W;x+=TILE){ c.beginPath();c.moveTo(x,0);c.lineTo(x,H);c.stroke(); }
+  for(let y=0;y<=H;y+=TILE){ c.beginPath();c.moveTo(0,y);c.lineTo(W,y);c.stroke(); }
+  c.restore();
+
+  // جاده
+  c.save(); c.lineJoin='round'; c.lineCap='round';
+  c.strokeStyle='rgba(0,0,0,.45)'; c.lineWidth=TILE*0.94; pathStroke(c);
+  c.strokeStyle='#6e5a37'; c.lineWidth=TILE*0.84; pathStroke(c);
+  c.strokeStyle='#c3a674'; c.lineWidth=TILE*0.70; pathStroke(c);
+  c.strokeStyle='#d6bd8f'; c.lineWidth=TILE*0.52; pathStroke(c);
+  // خط‌چین وسط
+  c.globalAlpha=0.35; c.strokeStyle='#8a6f42'; c.lineWidth=3;
+  c.setLineDash([16,18]); pathStroke(c); c.setLineDash([]);
+  c.restore();
+
+  // سایه‌های محیطی
+  const vg = c.createRadialGradient(W/2,H/2,H*0.25,W/2,H/2,H*0.95);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,0.5)');
+  c.fillStyle=vg; c.fillRect(0,0,W,H);
+}
+drawBackground(bctx);
+
+/* ---------- پرچم ---------- */
+function drawFlag(c,x,y,t){
+  const pulse = 0.5+0.5*Math.sin(t*2.2);
+  // درخشش
+  c.save();
+  const gl = c.createRadialGradient(x,y-30,4,x,y-30,70);
+  gl.addColorStop(0,'rgba(125,255,176,'+(0.16+pulse*0.12)+')');
+  gl.addColorStop(1,'rgba(125,255,176,0)');
+  c.fillStyle=gl; c.beginPath(); c.arc(x,y-30,70,0,7); c.fill();
+  c.restore();
+
+  // پایه سنگ
+  c.fillStyle='#4a5c50'; c.beginPath(); c.ellipse(x,y+8,26,11,0,0,7); c.fill();
+  c.fillStyle='#6c8375'; c.beginPath(); c.ellipse(x,y+4,24,10,0,0,7); c.fill();
+
+  // میله
+  c.fillStyle='#8d7350'; c.fillRect(x-2.5,y-78,5,86);
+  c.fillStyle='#b39264'; c.fillRect(x-2.5,y-78,2,86);
+  c.fillStyle='#ffd964'; c.beginPath(); c.arc(x,y-80,5,0,7); c.fill();
+
+  // پارچه پرچم ایران
+  const fx = x-52, fy = y-76, fw = 46, fh = 30;
+  c.save();
+  c.shadowColor='rgba(0,0,0,.55)'; c.shadowBlur=8; c.shadowOffsetY=3;
+  c.fillStyle='#239f40'; c.fillRect(fx,fy,fw,fh/3);
+  c.fillStyle='#ffffff'; c.fillRect(fx,fy+fh/3,fw,fh/3);
+  c.fillStyle='#da0000'; c.fillRect(fx,fy+2*fh/3,fw,fh/3);
+  c.restore();
+
+  // نشان وسط (ساده‌شده)
+  const cx = fx+fw/2, cy = fy+fh/2;
+  c.fillStyle='#da0000';
+  c.beginPath();
+  c.moveTo(cx,cy-4.5);
+  c.bezierCurveTo(cx+3.5,cy-4.5,cx+4.5,cy+1,cx+2,cy+3.2);
+  c.lineTo(cx,cy+4.5);
+  c.lineTo(cx-2,cy+3.2);
+  c.bezierCurveTo(cx-4.5,cy+1,cx-3.5,cy-4.5,cx,cy-4.5);
+  c.fill();
+  c.fillRect(cx-0.8,cy-6.5,1.6,2.2);
+
+  c.strokeStyle='rgba(0,0,0,.35)'; c.lineWidth=1;
+  c.strokeRect(fx,fy,fw,fh);
+}
+
+/* ═══════ منطق بازی ═══════ */
+function towerStats(t){
+  const b = TOWERS[t.type], lv = t.level;
+  return {
+    range: b.range*(1+0.13*(lv-1)),
+    dmg: b.dmg*(1+0.55*(lv-1)),
+    rate: b.rate*(1-0.09*(lv-1)),
+    splash: (b.splash||0)*(1+0.15*(lv-1)),
+    slow: b.slow||0,
+    slowTime: b.slowTime||0,
+    chain: (b.chain||0)+(lv>2?1:0),
+    air: b.air
+  };
+}
+function upgradeCost(t){
+  return Math.floor(TOWERS[t.type].cost * 0.8 * t.level);
+}
+
+function spawnEnemy(type){
+  const d = ENEMIES[type];
+  const scale = 1 + S.level*0.30;
+  const p = WAYPOINTS[0];
+  S.enemies.push({
+    type, x:p.x, y:p.y, wp:1, dist:0,
+    hp: d.hp*scale, maxHp: d.hp*scale,
+    speed: d.speed, reward: d.reward, armor: d.armor||0,
+    air: !!d.air, r: d.r, color: d.color,
+    slowT:0, slowF:1, hitFlash:0, wob: Math.random()*6.28
+  });
+}
+
+function startWave(){
+  if(S.wave >= S.waves.length) return;
+  const w = S.waves[S.wave];
+  S.wave++;
+  S.spawnQueue = [];
+  for(const g of w){
+    for(let i=0;i<g.n;i++) S.spawnQueue.push({t:g.t, g:g.g});
+    S.spawnQueue.push({t:null, g:0.85});
+  }
+  S.spawnTimer = 0.25;
+  S.waveActive = true;
+  SND.wave();
+  updateUI();
+}
+
+function damageEnemy(e, dmg){
+  if(e.hp <= 0) return;
+  const d = Math.max(1, dmg - e.armor);
+  e.hp -= d;
+  e.hitFlash = 0.09;
+  if(e.hp <= 0){
+    e.dead = true;
+    S.money += e.reward;
+    S.kills++;
+    S.effects.push({kind:'death', x:e.x, y:e.y, r:e.r, life:0.35, max:0.35, color:e.color});
+    SND.die();
+  }
+}
+
+function findTarget(t, st){
+  let best = null, bestD = -1;
+  for(let i=0;i<S.enemies.length;i++){
+    const e = S.enemies[i];
+    if(e.hp<=0) continue;
+    if(e.air && !st.air) continue;
+    const dx = e.x-t.x, dy = e.y-t.y;
+    if(dx*dx+dy*dy <= st.range*st.range && e.dist > bestD){
+      best = e; bestD = e.dist;
+    }
+  }
+  return best;
+}
+
+function towerShoot(t, st, target){
+  const b = TOWERS[t.type];
+  t.angle = Math.atan2(target.y-t.y, target.x-t.x);
+
+  if(t.type === 'tesla'){
+    const hit = [target];
+    const seen = new Set([target]);
+    let cur = target;
+    for(let i=1;i<st.chain;i++){
+      let nx=null, nd=1e9;
+      for(const e of S.enemies){
+        if(seen.has(e)||e.hp<=0) continue;
+        if(e.air && !st.air) continue;
+        const d = dist2(e.x,e.y,cur.x,cur.y);
+        if(d < 132*132 && d < nd){ nd = d; nx = e; }
+      }
+      if(!nx) break;
+      seen.add(nx); hit.push(nx); cur = nx;
+    }
+    let px=t.x, py=t.y;
+    for(const e of hit){
+      S.effects.push({kind:'bolt', x1:px, y1:py, x2:e.x, y2:e.y, life:0.16, max:0.16});
+      damageEnemy(e, st.dmg);
+      px = e.x; py = e.y;
+    }
+    SND.zap();
+    return;
+  }
+
+  let speed = 520, color = '#ffe9a8';
+  if(t.type==='cannon'){ speed=330; color='#3a3a3a'; }
+  else if(t.type==='frost'){ speed=430; color='#a8e6ff'; }
+  else if(t.type==='missile'){ speed=440; color='#ff9b6b'; }
+
+  S.projs.push({
+    x:t.x, y:t.y, tx:target.x, ty:target.y, target,
+    speed, dmg:st.dmg, splash:st.splash, slow:st.slow, slowTime:st.slowTime,
+    air:st.air, color, type:t.type, ang:0, life:2.5
+  });
+
+  if(t.type==='archer') SND.shoot();
+  else if(t.type==='cannon') SND.cannon();
+  else if(t.type==='frost') SND.ice();
+  else if(t.type==='missile') SND.rocket();
+}
+
+function hitProjectile(p){
+  if(p.splash > 0){
+    S.effects.push({kind:'boom', x:p.x, y:p.y, r:p.splash, life:0.3, max:0.3});
+    SND.hit();
+    for(const e of S.enemies){
+      if(e.hp<=0) continue;
+      if(e.air && !p.air) continue;
+      const d = Math.sqrt(dist2(e.x,e.y,p.x,p.y));
+      if(d <= p.splash){
+        damageEnemy(e, p.dmg*(1 - 0.42*(d/p.splash)));
+      }
+    }
+  } else {
+    if(p.target && p.target.hp > 0){
+      damageEnemy(p.target, p.dmg);
+      if(p.slow > 0){
+        p.target.slowT = p.slowTime;
+        p.target.slowF = 1 - p.slow;
+      }
+    }
+    S.effects.push({kind:'spark', x:p.x, y:p.y, life:0.16, max:0.16, color:p.color});
+  }
+}
+
+/* ---------- به‌روزرسانی ---------- */
+function update(dt){
+  S.time += dt;
+
+  /* موج‌ها */
+  if(!S.waveActive){
+    if(S.wave < S.waves.length){
+      S.waveDelay -= dt;
+      if(S.waveDelay <= 0) startWave();
+    }
+  }
+
+  /* تولید دشمن */
+  if(S.spawnQueue.length){
+    S.spawnTimer -= dt;
+    let guard = 0;
+    while(S.spawnTimer <= 0 && S.spawnQueue.length && guard++ < 40){
+      const item = S.spawnQueue.shift();
+      if(item.t) spawnEnemy(item.t);
+      S.spawnTimer += item.g;
+    }
+    if(S.spawnTimer < 0) S.spawnTimer = 0;
+  }
+
+  /* دشمنان */
+  for(let i=S.enemies.length-1;i>=0;i--){
+    const e = S.enemies[i];
+    if(e.hp <= 0){ S.enemies.splice(i,1); continue; }
+
+    if(e.hitFlash > 0) e.hitFlash -= dt;
+    if(e.slowT > 0){
+      e.slowT -= dt;
+      if(e.slowT <= 0) e.slowF = 1;
+    }
+    e.wob += dt*8;
+
+    let rem = e.speed * e.slowF * dt;
+    while(rem > 0 && e.wp < WAYPOINTS.length){
+      const tp = WAYPOINTS[e.wp];
+      const dx = tp.x-e.x, dy = tp.y-e.y;
+      const d = Math.hypot(dx,dy);
+      if(d <= rem){
+        e.x = tp.x; e.y = tp.y; e.dist += d; rem -= d; e.wp++;
+      } else {
+        e.x += dx/d*rem; e.y += dy/d*rem; e.dist += rem; rem = 0;
+      }
+    }
+    if(e.wp >= WAYPOINTS.length){
+      S.enemies.splice(i,1);
+      S.lives--;
+      SND.life();
+      S.effects.push({kind:'leak', x:WAYPOINTS[WAYPOINTS.length-1].x, y:WAYPOINTS[WAYPOINTS.length-1].y, life:0.5, max:0.5});
+      if(S.lives <= 0){ S.lives = 0; gameLose(); return; }
+    }
+  }
+
+  /* برج‌ها */
+  for(const t of S.towers){
+    const st = towerStats(t);
+    t.cd -= dt;
+    if(t.cd <= 0){
+      const target = findTarget(t, st);
+      if(target){
+        towerShoot(t, st, target);
+        t.cd = st.rate;
+      } else {
+        t.cd = 0;
+      }
+    }
+    // چرخش نرم به سمت هدف
+    if(t.angle !== undefined){
+      const target = findTarget(t, st);
+      if(target){
+        const want = Math.atan2(target.y-t.y, target.x-t.x);
+        let diff = want - (t.visAngle||0);
+        while(diff > Math.PI) diff -= Math.PI*2;
+        while(diff < -Math.PI) diff += Math.PI*2;
+        t.visAngle = (t.visAngle||0) + diff*Math.min(1, dt*14);
+      }
+    }
+  }
+
+  /* پرتابه‌ها */
+  for(let i=S.projs.length-1;i>=0;i--){
+    const p = S.projs[i];
+    p.life -= dt;
+    if(p.life <= 0){ S.projs.splice(i,1); continue; }
+
+    if(p.target && p.target.hp > 0){ p.tx = p.target.x; p.ty = p.target.y; }
+    const dx = p.tx-p.x, dy = p.ty-p.y;
+    const d = Math.hypot(dx,dy);
+    const step = p.speed*dt;
+    p.ang = Math.atan2(dy,dx);
+
+    if(d <= step || d < 2){
+      p.x = p.tx; p.y = p.ty;
+      hitProjectile(p);
+      S.projs.splice(i,1);
+    } else {
+      p.x += dx/d*step; p.y += dy/d*step;
+    }
+  }
+
+  /* افکت‌ها */
+  for(let i=S.effects.length-1;i>=0;i--){
+    const f = S.effects[i];
+    f.life -= dt;
+    if(f.life <= 0) S.effects.splice(i,1);
+  }
+
+  /* پایان موج */
+  if(S.waveActive && S.spawnQueue.length === 0 && S.enemies.length === 0){
+    S.waveActive = false;
+    if(S.wave < S.waves.length){
+      S.money += 45 + S.wave*14;
+      S.waveDelay = 7;
+      SND.clear();
+    }
+    updateUI();
+  }
+
+  /* پایان مرحله */
+  if(!S.waveActive && S.wave >= S.waves.length && S.enemies.length === 0 && S.spawnQueue.length === 0){
+    gameWin();
+  }
+}
+
+/* ---------- رندر ---------- */
+function render(){
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(bgCanvas, 0, 0, W, H);
+
+  drawFlag(ctx, WAYPOINTS[WAYPOINTS.length-1].x, WAYPOINTS[WAYPOINTS.length-1].y, S.time);
+
+  // هایلایت قرارگیری
+  if(S.selectedType && S.hover){
+    const {col,row} = S.hover;
+    const ok = canPlace(col,row);
+    const x = col*TILE, y = row*TILE;
+    ctx.save();
+    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = ok ? 'rgba(80,255,150,.28)' : 'rgba(255,70,70,.3)';
+    ctx.fillRect(x+2,y+2,TILE-4,TILE-4);
+    ctx.strokeStyle = ok ? '#7dffb0' : '#ff5b5b';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x+2,y+2,TILE-4,TILE-4);
+    if(ok){
+      const st = TOWERS[S.selectedType];
+      ctx.beginPath();
+      ctx.arc(x+TILE/2, y+TILE/2, st.range, 0, 7);
+      ctx.fillStyle='rgba(125,255,176,.10)';
+      ctx.fill();
+      ctx.strokeStyle='rgba(125,255,176,.55)';
+      ctx.lineWidth=1.6;
+      ctx.setLineDash([7,7]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.restore();
+  }
+
+  // محدوده برج انتخاب‌شده
+  if(S.selectedTower){
+    const t = S.selectedTower, st = towerStats(t);
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, st.range, 0, 7);
+    ctx.fillStyle='rgba(255,217,100,.10)';
+    ctx.fill();
+    ctx.strokeStyle='rgba(255,217,100,.8)';
+    ctx.lineWidth=2;
+    ctx.setLineDash([8,6]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  // برج‌ها
+  for(const t of S.towers) drawTower(ctx, t);
+
+  // دشمنان
+  for(const e of S.enemies) drawEnemy(ctx, e);
+
+  // پرتابه‌ها
+  for(const p of S.projs) drawProjectile(ctx, p);
+
+  // افکت‌ها
+  for(const f of S.effects) drawEffect(ctx, f);
+}
+
+function drawTower(c, t){
+  const b = TOWERS[t.type];
+  const ang = t.visAngle || 0;
+
+  // سایه
+  c.fillStyle='rgba(0,0,0,.35)';
+  c.beginPath(); c.ellipse(t.x, t.y+6, 18, 9, 0, 0, 7); c.fill();
+
+  // پایه سنگی
+  c.fillStyle='#3c5247';
+  c.beginPath(); c.arc(t.x, t.y, 18, 0, 7); c.fill();
+  c.fillStyle='#5d7a6b';
+  c.beginPath(); c.arc(t.x, t.y-1.5, 16.5, 0, 7); c.fill();
+  c.fillStyle='#243a30';
+  c.beginPath(); c.arc(t.x, t.y-1.5, 13.5, 0, 7); c.fill();
+
+  // بدنه رنگی
+  const g = c.createRadialGradient(t.x-4, t.y-6, 2, t.x, t.y, 14);
+  g.addColorStop(0, b.color);
+  g.addColorStop(1, '#12241b');
+  c.fillStyle = g;
+  c.beginPath(); c.arc(t.x, t.y-2, 11, 0, 7); c.fill();
+
+  // لوله
+  c.save();
+  c.translate(t.x, t.y-2);
+  c.rotate(ang);
+  c.fillStyle='#1b2b22';
+  c.fillRect(3, -3.5, 16, 7);
+  c.fillStyle = b.color;
+  c.fillRect(3, -2, 14, 4);
+  c.fillStyle='#0d1710';
+  c.fillRect(15, -4, 4, 8);
+  c.restore();
+
+  // نشان سطح
+  for(let i=0;i<t.level;i++){
+    const a = -Math.PI/2 + (i - (t.level-1)/2)*0.62;
+    c.fillStyle='#ffd964';
+    c.beginPath();
+    c.arc(t.x + Math.cos(a)*21, t.y + Math.sin(a)*21, 2.8, 0, 7);
+    c.fill();
+  }
+}
+
+function drawEnemy(c, e){
+  const bob = e.air ? Math.sin(e.wob*1.2)*3 - 9 : Math.sin(e.wob*0.9)*1.2;
+  const x = e.x, y = e.y + bob;
+
+  // سایه
+  c.fillStyle='rgba(0,0,0,.30)';
+  c.beginPath();
+  c.ellipse(e.x, e.y + e.r*0.55, e.r*0.85, e.r*0.4, 0, 0, 7);
+  c.fill();
+
+  // بدن
+  let col = e.color;
+  if(e.hitFlash > 0) col = '#ffffff';
+  const g = c.createRadialGradient(x-e.r*0.35, y-e.r*0.4, e.r*0.15, x, y, e.r*1.1);
+  g.addColorStop(0, col);
+  g.addColorStop(1, shade(col,-45));
+  c.fillStyle = g;
+  c.beginPath(); c.arc(x, y, e.r, 0, 7); c.fill();
+
+  c.strokeStyle='rgba(0,0,0,.45)'; c.lineWidth=2;
+  c.beginPath(); c.arc(x, y, e.r, 0, 7); c.stroke();
+
+  // حلقه یخ
+  if(e.slowT > 0){
+    c.strokeStyle='rgba(140,225,255,.9)';
+    c.lineWidth=2.5;
+    c.beginPath(); c.arc(x, y, e.r+3.5, 0, 7); c.stroke();
+  }
+
+  // چشم‌ها
+  const ex = e.r*0.34, ey = -e.r*0.18, er = e.r*0.24;
+  c.fillStyle='#ffffff';
+  c.beginPath(); c.arc(x-ex, y+ey, er, 0, 7); c.fill();
+  c.beginPath(); c.arc(x+ex, y+ey, er, 0, 7); c.fill();
+  c.fillStyle='#111111';
+  c.beginPath(); c.arc(x-ex+e.r*0.06, y+ey+e.r*0.03, er*0.5, 0, 7); c.fill();
+  c.beginPath(); c.arc(x+ex+e.r*0.06, y+ey+e.r*0.03, er*0.5, 0, 7); c.fill();
+
+  // تاج رئیس
+  if(e.type === 'boss'){
+    c.fillStyle='#ffd964';
+    c.beginPath();
+    c.moveTo(x-e.r*0.7, y-e.r*0.85);
+    c.lineTo(x-e.r*0.7, y-e.r*1.25);
+    c.lineTo(x-e.r*0.35, y-e.r*1.0);
+    c.lineTo(x, y-e.r*1.4);
+    c.lineTo(x+e.r*0.35, y-e.r*1.0);
+    c.lineTo(x+e.r*0.7, y-e.r*1.25);
+    c.lineTo(x+e.r*0.7, y-e.r*0.85);
+    c.closePath(); c.fill();
+  }
+
+  // نوار جان
+  if(e.hp < e.maxHp){
+    const bw = e.r*2.3, bh = 4.5;
+    const bx = x - bw/2, by = y - e.r - 12;
+    const ratio = clamp(e.hp/e.maxHp, 0, 1);
+    c.fillStyle='rgba(0,0,0,.7)';
+    c.fillRect(bx-1, by-1, bw+2, bh+2);
+    c.fillStyle = ratio>0.55 ? '#4ade80' : ratio>0.25 ? '#fbbf24' : '#ef4444';
+    c.fillRect(bx, by, bw*ratio, bh);
+  }
+}
+
+function shade(hex, amt){
+  const n = parseInt(hex.slice(1),16);
+  let r=(n>>16)&255, g=(n>>8)&255, b=n&255;
+  r=clamp(r+amt,0,255); g=clamp(g+amt,0,255); b=clamp(b+amt,0,255);
+  return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+
+function drawProjectile(c, p){
+  c.save();
+  c.translate(p.x, p.y);
+  if(p.type === 'cannon'){
+    c.fillStyle='#2b2b2b';
+    c.beginPath(); c.arc(0,0,5.5,0,7); c.fill();
+    c.fillStyle='#6b6b6b';
+    c.beginPath(); c.arc(-1.5,-1.5,2.2,0,7); c.fill();
+  } else if(p.type === 'missile'){
+    c.rotate(p.ang);
+    c.fillStyle='#ff7a45';
+    c.beginPath(); c.ellipse(-8,0,5,2.4,0,0,7); c.fill();
+    c.fillStyle='#e8e8e8';
+    c.fillRect(-4,-2.4,12,4.8);
+    c.fillStyle='#d13b3b';
+    c.beginPath(); c.moveTo(8,-2.4); c.lineTo(13,0); c.lineTo(8,2.4); c.closePath(); c.fill();
+  } else if(p.type === 'frost'){
+    c.rotate(S.time*7);
+    c.fillStyle='#bdefff';
+    c.beginPath();
+    for(let i=0;i<6;i++){
+      const a = Math.PI/3*i;
+      i===0 ? c.moveTo(Math.cos(a)*6, Math.sin(a)*6) : c.lineTo(Math.cos(a)*6, Math.sin(a)*6);
+    }
+    c.closePath(); c.fill();
+    c.fillStyle='#5fc8f0';
+    c.beginPath(); c.arc(0,0,2.5,0,7); c.fill();
+  } else {
+    c.rotate(p.ang);
+    c.fillStyle='#ffe9a8';
+    c.fillRect(-7,-1.4,14,2.8);
+    c.fillStyle='#ffffff';
+    c.beginPath(); c.moveTo(7,-3.5); c.lineTo(13,0); c.lineTo(7,3.5); c.closePath(); c.fill();
+  }
+  c.restore();
+}
+
+function drawEffect(c, f){
+  const k = f.life / f.max;
+  if(f.kind === 'boom'){
+    const r = f.r * (1 - k*0.55) * 1.15;
+    c.save();
+    c.globalAlpha = k;
+    const g = c.createRadialGradient(f.x, f.y, 0, f.x, f.y, r);
+    g.addColorStop(0,'rgba(255,230,150,.95)');
+    g.addColorStop(0.45,'rgba(255,140,50,.75)');
+    g.addColorStop(1,'rgba(255,60,20,0)');
+    c.fillStyle = g;
+    c.beginPath(); c.arc(f.x, f.y, r, 0, 7); c.fill();
+    c.restore();
+  } else if(f.kind === 'spark'){
+    c.save();
+    c.globalAlpha = k;
+    c.fillStyle = f.color || '#fff';
+    c.beginPath(); c.arc(f.x, f.y, 6*k+2, 0, 7); c.fill();
+    c.restore();
+  } else if(f.kind === 'death'){
+    c.save();
+    c.globalAlpha = k*0.85;
+    c.strokeStyle = f.color;
+    c.lineWidth = 3*k+1;
+    c.beginPath(); c.arc(f.x, f.y, f.r + (1-k)*22, 0, 7); c.stroke();
+    c.restore();
+  } else if(f.kind === 'bolt'){
+    c.save();
+    c.globalAlpha = k;
+    c.strokeStyle = '#fff6b0';
+    c.lineWidth = 3.5;
+    c.shadowColor = '#ffe14d'; c.shadowBlur = 12;
+    c.beginPath();
+    c.moveTo(f.x1, f.y1);
+    const segs = 4;
+    for(let i=1;i<segs;i++){
+      const t = i/segs;
+      const jx = f.x1 + (f.x2-f.x1)*t + (Math.random()-0.5)*16;
+      const jy = f.y1 + (f.y2-f.y1)*t + (Math.random()-0.5)*16;
+      c.lineTo(jx, jy);
+    }
+    c.lineTo(f.x2, f.y2);
+    c.stroke();
+    c.restore();
+  } else if(f.kind === 'leak'){
+    c.save();
+    c.globalAlpha = k;
+    c.strokeStyle = '#ff4444';
+    c.lineWidth = 4;
+    c.beginPath(); c.arc(f.x, f.y, (1-k)*45+10, 0, 7); c.stroke();
+    c.restore();
+  }
+}
+
+/* ═══════ رابط کاربری ═══════ */
+const shopEl = document.getElementById('shop');
+const panelEl = document.getElementById('towerPanel');
+const overlayEl = document.getElementById('overlay');
+const uiLives = document.getElementById('uiLives');
+const uiMoney = document.getElementById('uiMoney');
+const uiWave = document.getElementById('uiWave');
+const levelNameEl = document.getElementById('levelName');
+
+function buildShop(){
+  shopEl.innerHTML = '';
+  TOWER_KEYS.forEach((k,i)=>{
+    const b = TOWERS[k];
+    const d = document.createElement('div');
+    d.className = 'card';
+    d.dataset.type = k;
+    d.innerHTML = `<div class="ic">${b.icon}</div>
+                   <div class="nm">${b.name}</div>
+                   <div class="cost">${fa(b.cost)}</div>`;
+    d.addEventListener('pointerdown', ev=>{
+      ev.preventDefault();
+      audioInit();
+      selectType(k);
+    });
+    shopEl.appendChild(d);
+  });
+}
+
+function selectType(k){
+  if(S.money < TOWERS[k].cost){ SND.nope(); return; }
+  if(S.selectedType === k){
+    S.selectedType = null;
+  } else {
+    S.selectedType = k;
+    S.selectedTower = null;
+    panelEl.style.display = 'none';
+    shopEl.style.display = 'flex';
+  }
+  updateUI();
+}
+
+function updateUI(){
+  uiLives.textContent = fa(S.lives);
+  uiMoney.textContent = fa(S.money);
+  uiWave.textContent = fa(Math.min(S.wave, S.waves.length)) + '/' + fa(S.waves.length);
+  levelNameEl.textContent = LEVELS[S.level].name;
+
+  document.querySelectorAll('.card').forEach(c=>{
+    const k = c.dataset.type;
+    const b = TOWERS[k];
+    c.classList.toggle('sel', S.selectedType === k);
+    c.classList.toggle('poor', S.money < b.cost);
+  });
+}
+
+function renderTowerPanel(){
+  const t = S.selectedTower;
+  if(!t){
+    panelEl.style.display = 'none';
+    shopEl.style.display = 'flex';
+    return;
+  }
+  shopEl.style.display = 'none';
+  panelEl.style.display = 'flex';
+
+  const b = TOWERS[t.type];
+  const st = towerStats(t);
+  const uc = upgradeCost(t);
+  const maxed = t.level >= 3;
+  const sellVal = Math.floor(t.invested * 0.62);
+
+  panelEl.innerHTML = `
+    <div class="tp-ic">${b.icon}</div>
+    <div class="tp-info">
+      <b>${b.name} — سطح ${fa(t.level)}</b>
+      <span>آسیب ${fa(Math.round(st.dmg))} · برد ${fa(Math.round(st.range))}</span>
+    </div>
+    ${maxed
+      ? `<button class="tp-btn tp-up dis" disabled>حداکثر</button>`
+      : `<button class="tp-btn tp-up ${S.money<uc?'dis':''}" data-act="up">ارتقا ${fa(uc)}💰</button>`}
+    <button class="tp-btn tp-sell" data-act="sell">فروش ${fa(sellVal)}💰</button>
+    <button class="tp-btn" style="background:#2b4a3b;color:#cde" data-act="close">✕</button>
+  `;
+
+  panelEl.querySelectorAll('[data-act]').forEach(btn=>{
+    btn.addEventListener('pointerdown', ev=>{
+      ev.preventDefault();
+      const act = btn.dataset.act;
+      if(act === 'up'){
+        if(t.level >= 3 || S.money < uc){ SND.nope(); return; }
+        S.money -= uc;
+        t.invested += uc;
+        t.level++;
+        SND.upgrade();
+        renderTowerPanel();
+        updateUI();
+      } else if(act === 'sell'){
+        S.money += sellVal;
+        S.towers = S.towers.filter(x=>x!==t);
+        S.selectedTower = null;
+        SND.sell();
+        renderTowerPanel();
+        updateUI();
+      } else {
+        S.selectedTower = null;
+        renderTowerPanel();
+      }
+    });
+  });
+}
+
+/* ---------- تعامل با بوم ---------- */
+function getPos(ev){
+  const r = canvas.getBoundingClientRect();
+  return {
+    x: (ev.clientX - r.left) * (W / r.width),
+    y: (ev.clientY - r.top) * (H / r.height)
+  };
+}
+function canPlace(col,row){
+  if(col<0||col>=COLS||row<0||row>=ROWS) return false;
+  if(pathSet.has(col+','+row)) return false;
+  for(const t of S.towers) if(t.col===col && t.row===row) return false;
+  return true;
+}
+
+canvas.addEventListener('pointermove', ev=>{
+  const p = getPos(ev);
+  const col = Math.floor(p.x/TILE), row = Math.floor(p.y/TILE);
+  S.hover = (col>=0&&col<COLS&&row>=0&&row<ROWS) ? {col,row} : null;
+});
+canvas.addEventListener('pointerleave', ()=>{ S.hover = null; });
+
+canvas.addEventListener('pointerdown', ev=>{
+  ev.preventDefault();
+  audioInit();
+  if(!S.started || S.gameOver) return;
+
+  const p = getPos(ev);
+  const col = Math.floor(p.x/TILE), row = Math.floor(p.y/TILE);
+  if(col<0||col>=COLS||row<0||row>=ROWS) return;
+
+  // قرار دادن برج
+  if(S.selectedType){
+    const b = TOWERS[S.selectedType];
+    if(!canPlace(col,row)){ SND.nope(); return; }
+    if(S.money < b.cost){ SND.nope(); return; }
+    S.money -= b.cost;
+    S.towers.push({
+      type: S.selectedType, col, row,
+      x: col*TILE+TILE/2, y: row*TILE+TILE/2,
+      level: 1, cd: 0, invested: b.cost, angle: -Math.PI/2, visAngle: -Math.PI/2
+    });
+    SND.place();
+    S.selectedType = null;
+    updateUI();
+    return;
+  }
+
+  // انتخاب برج موجود
+  let found = null;
+  for(const t of S.towers) if(t.col===col && t.row===row){ found = t; break; }
+  if(found){
+    S.selectedTower = found;
+    renderTowerPanel();
+  } else {
+    S.selectedTower = null;
+    renderTowerPanel();
+  }
+});
+
+window.addEventListener('keydown', ev=>{
+  if(ev.key === 'Escape'){ S.selectedType = null; S.selectedTower = null; renderTowerPanel(); updateUI(); }
+  const n = parseInt(ev.key);
+  if(n>=1 && n<=5){ audioInit(); selectType(TOWER_KEYS[n-1]); }
+});
+
+/* ---------- رویدادهای HUD ---------- */
+const muteBtn = document.getElementById('muteBtn');
+muteBtn.addEventListener('click', ()=>{
+  muted = !muted;
+  muteBtn.textContent = muted ? '🔇' : '🔊';
+  if(!muted){ audioInit(); tone(660,0.08,'sine',0.05); }
+});
+const speedBtn = document.getElementById('speedBtn');
+speedBtn.addEventListener('click', ()=>{
+  S.speed = S.speed === 1 ? 2 : S.speed === 2 ? 3 : 1;
+  speedBtn.textContent = S.speed === 1 ? '⏩' : S.speed === 2 ? '⏩⏩' : '⏩⏩⏩';
+  speedBtn.style.color = S.speed>1 ? '#ffd964' : '';
+});
+
+/* ---------- روکش ---------- */
+function showOverlay(html, btnText, cb){
+  overlayEl.innerHTML = `<div class="panel">${html}<button id="ovBtn">${btnText}</button></div>`;
+  overlayEl.classList.add('show');
+  document.getElementById('ovBtn').addEventListener('click', ()=>{
+    audioInit();
+    overlayEl.classList.remove('show');
+    cb();
+  });
+}
+function hideOverlay(){ overlayEl.classList.remove('show'); }
+
+/* ---------- جریان بازی ---------- */
+function loadLevel(i){
+  S.level = i;
+  S.waves = LEVELS[i].waves;
+  S.wave = 0;
+  S.waveActive = false;
+  S.waveDelay = 5;
+  S.money = 260 + i*55;
+  S.lives = 20;
+  S.maxLives = 20;
+  S.enemies = [];
+  S.towers = [];
+  S.projs = [];
+  S.effects = [];
+  S.spawnQueue = [];
+  S.spawnTimer = 0;
+  S.selectedType = null;
+  S.selectedTower = null;
+  S.gameOver = false;
+  S.paused = false;
+  S.kills = 0;
+  panelEl.style.display = 'none';
+  shopEl.style.display = 'flex';
+  updateUI();
+}
+
+function gameWin(){
+  if(S.gameOver) return;
+  S.gameOver = true;
+  SND.win();
+  if(S.level < LEVELS.length - 1){
+    showOverlay(`
+      <div class="flag"><i style="background:#239f40"></i><i style="background:#fff"></i><i style="background:#da0000"></i></div>
+      <h2>پیروزی! سنگر حفظ شد</h2>
+      <p>مرحله «${LEVELS[S.level].name}» با موفقیت آزاد شد.<br>
+      دشمنان نابودشده: <b style="color:#ffd964">${fa(S.kills)}</b><br>
+      جان‌های باقی‌مانده: <b style="color:#ffd964">${fa(S.lives)}</b></p>
+    `, 'مرحله بعد ⚑', ()=>{
+      loadLevel(S.level + 1);
+      S.gameOver = false;
+    });
+  } else {
+    showOverlay(`
+      <div class="flag"><i style="background:#239f40"></i><i style="background:#fff"></i><i style="background:#da0000"></i></div>
+      <h1>سرافراز شدی!</h1>
+      <p>هر پنج سنگر در برابر دشمن ایستادگی کرد.<br>
+      ایران‌زمین امن ماند. 🇮🇷<br><br>
+      دشمنان نابودشده: <b style="color:#ffd964">${fa(S.kills)}</b></p>
+    `, 'از نو 🔄', ()=>{
+      loadLevel(0);
+      S.gameOver = false;
+    });
+  }
+}
+
+function gameLose(){
+  if(S.gameOver) return;
+  S.gameOver = true;
+  SND.lose();
+  showOverlay(`
+    <h2 style="color:#ff6b6b">سنگر سقوط کرد</h2>
+    <p>دشمن از خط مقدم گذشت...<br>
+    اما ایران هرگز تسلیم نمی‌شود.</p>
+  `, 'تلاش دوباره 🔄', ()=>{
+    loadLevel(S.level);
+    S.gameOver = false;
+  });
+}
+
+/* ---------- حلقه اصلی ---------- */
+let lastT = performance.now();
+function loop(now){
+  let dt = (now - lastT) / 1000;
+  lastT = now;
+  dt = Math.min(dt, 0.05) * S.speed;
+
+  if(S.started && !S.paused && !S.gameOver){
+    update(dt);
+  }
+
+  render();
+
+  S.uiTick += dt;
+  if(S.uiTick > 0.12){
+    S.uiTick = 0;
+    if(!S.selectedTower) updateUI();
+  }
+
+  requestAnimationFrame(loop);
+}
+
+/* ---------- شروع ---------- */
+buildShop();
+loadLevel(0);
+
+showOverlay(`
+  <div class="flag"><i style="background:#239f40"></i><i style="background:#fff"></i><i style="background:#da0000"></i></div>
+  <h1>خط مقدم</h1>
+  <p>
+    دشمن به مرزهای وطن رسیده است.<br>
+    برج‌های دفاعی را روی زمین بچین و<br>
+    نگذار حتی یک قدم جلوتر بیایند.<br>
+    <span style="color:#ffd964;font-size:11.5px">کلیدهای ۱ تا ۵ = انتخاب برج · Esc = لغو</span>
+  </p>
+`, 'شروع نبرد ⚔️', ()=>{
+  audioInit();
+  S.started = true;
+  S.gameOver = false;
+  lastT = performance.now();
+});
+
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
